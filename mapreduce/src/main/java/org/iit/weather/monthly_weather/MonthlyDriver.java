@@ -29,7 +29,8 @@ public class MonthlyDriver {
         job.setOutputValueClass(Text.class);
 
         // Add locationData.csv as distributed cache
-        job.addCacheFile(new Path(args[1]).toUri());
+        // job.addCacheFile(new Path(args[1]).toUri());
+        job.addCacheFile(new URI(args[1] + "#locationData.csv"));
 
         TextInputFormat.addInputPath(job, new Path(args[0]));
         TextOutputFormat.setOutputPath(job, new Path(args[2]));
