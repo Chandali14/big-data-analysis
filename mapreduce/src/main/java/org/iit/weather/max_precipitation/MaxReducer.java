@@ -14,15 +14,19 @@ public class MaxReducer extends Reducer<Text, Text, Text, Text> {
         double maxPrecip = -1;
         String maxRecord = "";
 
-        for (Text v : values) {
+        for (Text value : values) {
 
-            String line = v.toString();
+            String line = value.toString();
+
+            // Split KEY and VALUE
+            // Example: "Ampara,2014,1\t318.0,24.58"
             String[] parts = line.split("\t");
-
             if (parts.length != 2) continue;
 
-            String districtMonth = parts[0];
-            double precip = Double.parseDouble(parts[1].split(",")[0]);
+            String meta = parts[0];        // district,year,month
+            String[] weather = parts[1].split(",");
+
+            double precip = Double.parseDouble(weather[0]);  // precipitation only
 
             if (precip > maxPrecip) {
                 maxPrecip = precip;
@@ -30,6 +34,6 @@ public class MaxReducer extends Reducer<Text, Text, Text, Text> {
             }
         }
 
-        context.write(new Text("Highest Precipitation"), new Text(maxRecord));
+        context.write(new Text("Highest Precipitation Record"), new Text(maxRecord));
     }
 }
