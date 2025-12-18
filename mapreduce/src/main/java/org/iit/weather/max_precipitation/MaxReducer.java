@@ -38,24 +38,28 @@ public class MaxReducer extends Reducer<Text, Text, Text, Text> {
 
             if (precip > maxPrecip) {
                 maxPrecip = precip;
-                maxRecord = line;
+                maxRecord = meta;
                 maxTemp = Double.parseDouble(weather[1]);
             }
         }
-        if (!maxMeta.isEmpty()) {
-            String[] metaParts = maxMeta.split(",");
-            String district = metaParts[0]; // not needed for final format, but kept
-            int year = Integer.parseInt(metaParts[1]);
-            int month = Integer.parseInt(metaParts[2]);
 
-            String ordinal = getOrdinal(month);
+        // No record found
+        if (maxRecord.isEmpty()) return;
 
-            String outputSentence =
-                    ordinal + " month in " + year +
-                    " had the highest total precipitation of " +
-                    maxPrecip + " hr";
+        // Parse best record
+        String[] metaParts = maxRecord.split(",");
+        String district = metaParts[0];
+        int year = Integer.parseInt(metaParts[1]);
+        int month = Integer.parseInt(metaParts[2]);
 
-            context.write(new Text(""), new Text(outputSentence));
+        String ordinal = getOrdinal(month);
+
+        String outputSentence =
+                ordinal + " month in " + year +
+                        " had the highest total precipitation of " +
+                        maxPrecip + " hr";
+
+        context.write(new Text(""), new Text(outputSentence));
 
         // context.write(new Text("Highest Precipitation Record"), new Text(maxRecord));
     }
