@@ -1,4 +1,4 @@
-package org.iit.weather.job2;
+package org.iit.weather.task1_2;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -8,27 +8,28 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-public class JoinDriver {
+public class MaxDriver {
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length != 3) {
-            System.err.println("Usage: JoinDriver <job1output> <locationData> <output>");
+        if (args.length != 2) {
+            System.err.println("Usage: MaxDriver <aggregatedData> <output>");
             System.exit(2);
         }
 
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "Location Join");
+        Job job = Job.getInstance(conf, "Max Precipitation Finder");
 
-        job.setJarByClass(JoinDriver.class);
-        job.setMapperClass(JoinMapper.class);
-        job.setReducerClass(JoinReducer.class);
+        job.setJarByClass(MaxDriver.class);
+
+        job.setMapperClass(MaxMapper.class);
+        job.setReducerClass(MaxReducer.class);
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
-        TextInputFormat.addInputPaths(job, args[0] + "," + args[1]);
-        TextOutputFormat.setOutputPath(job, new Path(args[2]));
+        TextInputFormat.addInputPath(job, new Path(args[0]));
+        TextOutputFormat.setOutputPath(job, new Path(args[1]));
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
