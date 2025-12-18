@@ -1,4 +1,4 @@
-package org.iit.weather.task1_1;
+package org.iit.weather.monthly_weather;
 
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Reducer;
