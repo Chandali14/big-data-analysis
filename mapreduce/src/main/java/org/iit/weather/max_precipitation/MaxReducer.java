@@ -7,12 +7,20 @@ import java.io.IOException;
 
 public class MaxReducer extends Reducer<Text, Text, Text, Text> {
 
+    private String getOrdinal(int month) {
+        if (month == 1) return "1st";
+        if (month == 2) return "2nd";
+        if (month == 3) return "3rd";
+        return month + "th";
+    }
+
     @Override
     protected void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
         double maxPrecip = -1;
-        String maxRecord = "";
+        String maxRecord = ""; // district,year,month
+        double maxTemp = 0.0;
 
         for (Text value : values) {
 
@@ -31,9 +39,24 @@ public class MaxReducer extends Reducer<Text, Text, Text, Text> {
             if (precip > maxPrecip) {
                 maxPrecip = precip;
                 maxRecord = line;
+                maxTemp = Double.parseDouble(weather[1]);
             }
         }
+        if (!maxMeta.isEmpty()) {
+            String[] metaParts = maxMeta.split(",");
+            String district = metaParts[0]; // not needed for final format, but kept
+            int year = Integer.parseInt(metaParts[1]);
+            int month = Integer.parseInt(metaParts[2]);
 
-        context.write(new Text("Highest Precipitation Record"), new Text(maxRecord));
+            String ordinal = getOrdinal(month);
+
+            String outputSentence =
+                    ordinal + " month in " + year +
+                    " had the highest total precipitation of " +
+                    maxPrecip + " hr";
+
+            context.write(new Text(""), new Text(outputSentence));
+
+        // context.write(new Text("Highest Precipitation Record"), new Text(maxRecord));
     }
 }

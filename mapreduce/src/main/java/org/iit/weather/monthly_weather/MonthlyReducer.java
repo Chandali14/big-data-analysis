@@ -30,6 +30,8 @@ public class MonthlyReducer extends Reducer<Text, Text, Text, Text> {
         }
 
         double meanTemp = tempSum / count;
+        // Round to 2 decimals
+        meanTemp = Math.round(meanTemp * 100.0) / 100.0;
 
         // Key format: district,year,month
         String[] parts = key.toString().split(",");
@@ -42,7 +44,7 @@ public class MonthlyReducer extends Reducer<Text, Text, Text, Text> {
                 precipSum + " hours with a mean temperature of " +
                 meanTemp + " for " + ordinalMonth + " month";
 
-        context.write(new Text(district), new Text(sentence));
+        context.write(null, new Text(sentence));
 
         // context.write(key, new Text(precipSum + "," + meanTemp));
     }
