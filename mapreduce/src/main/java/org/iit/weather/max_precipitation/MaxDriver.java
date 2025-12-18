@@ -1,4 +1,4 @@
-package org.iit.weather.task1_2;
+package org.iit.weather.max_precipitation;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
