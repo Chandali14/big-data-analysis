@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # HDFS NameNode (Hadoop 2.8.5 for Hive compatibility)
+  # Hadoop NameNode
   namenode:
     image: ramilu90/hive-namenode:1.0.0
     container_name: hive-namenode
@@ -9,23 +9,22 @@ services:
     env_file:
       - ./hive.env
     environment:
-      - CLUSTER_NAME=hive-cluster
-      - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
+      CLUSTER_NAME: hive-cluster
     volumes:
       - ./data/namenode:/hadoop/dfs/name
       - ./input:/opt/input
     ports:
-      - "50070:50070"   # Hadoop NameNode UI
-      - "8020:8020"     # HDFS RPC
+      - "50070:50070"
+      - "8020:8020"
     networks:
       - hive-net
     healthcheck:
       test: ["CMD", "hdfs", "dfsadmin", "-report"]
       interval: 10s
       timeout: 5s
-      retries: 15
+      retries: 20
 
-  # DataNode
+  # Hadoop DataNode
   datanode:
     image: ramilu90/hive-datanode:1.0.0
     container_name: hive-datanode
@@ -33,8 +32,7 @@ services:
     env_file:
       - ./hive.env
     environment:
-      - HDFS_NAMENODE_RPC_ADDRESS=namenode:8020
-      - SERVICE_PRECONDITION=namenode:8020
+      SERVICE_PRECONDITION: "namenode:8020"
     volumes:
       - ./data/datanode:/hadoop/dfs/data
     depends_on:
@@ -43,7 +41,7 @@ services:
     networks:
       - hive-net
 
-  # PostgreSQL Metastore Database
+  # PostgreSQL Metastore
   hive-metastore-db:
     image: ramilu90/hive-metastore-postgresql:1.0.0
     container_name: hive-metastore-db
@@ -64,7 +62,7 @@ services:
       retries: 20
       timeout: 5s
 
-  # Initialize Hive Metastore Schema
+  # Hive Schema Initialization
   hive-metastore-init:
     image: ramilu90/hive-metastore-init:1.0.0
     container_name: hive-metastore-init
@@ -90,15 +88,13 @@ services:
     depends_on:
       hive-metastore-init:
         condition: service_completed_successfully
-      namenode:
-        condition: service_healthy
     command: /opt/hive/bin/hive --service metastore
     ports:
       - "9083:9083"
     networks:
       - hive-net
 
-  # HiveServer2 (JDBC/Beeline endpoint)
+  # HiveServer2
   hive-server:
     image: ramilu90/hive-server:1.0.0
     container_name: hive-server
@@ -108,8 +104,6 @@ services:
     depends_on:
       hive-metastore:
         condition: service_started
-      namenode:
-        condition: service_healthy
     command: /opt/hive/bin/hiveserver2
     ports:
       - "10000:10000"
