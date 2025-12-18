@@ -98,68 +98,10 @@ services:
     networks:
       - hadoop
 
-  # HIVE METASTORE DATABASE (PostgreSQL)
-  hive-metastore-db:
-    image: postgres:13
-    container_name: hive-metastore-db
-    restart: always
-    environment:
-      POSTGRES_USER: hive
-      POSTGRES_PASSWORD: hive
-      POSTGRES_DB: metastore
-    volumes:
-      - hive_metastore_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - hadoop
-    
-  # HIVE METASTORE SERVICE
-  # ========================================================================
-  hive-metastore:
-    image: bde2020/hive-metastore:2.3.2-postgresql-metastore
-    container_name: hive-metastore
-    restart: always
-    env_file:
-      - ./hadoop.env
-      - ./hive.env
-    environment:
-      HIVE_META_DB: postgres
-      HIVE_META_CONNECT_URL: jdbc:postgresql://hive-metastore-db:5432/metastore
-      HIVE_META_USER: hive
-      HIVE_META_PASSWORD: hive
-    depends_on:
-      - hive-metastore-db
-      - namenode
-    ports:
-      - "9083:9083"
-    networks:
-      - hadoop
-
-  # HIVE SERVER2 (for SQL queries)
-  hive-server:
-    image: bde2020/hive:2.3.2
-    container_name: hive-server
-    restart: always
-    env_file:
-      - ./hadoop.env
-      - ./hive.env
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870 hive-metastore:9083"
-      HADOOP_USER_NAME: root
-    depends_on:
-      - hive-metastore
-      - namenode
-    ports:
-      - "10000:10000"
-    networks:
-      - hadoop
-
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
   hadoop_datanode2:
-  hive_metastore_data:
 
 networks:
   hadoop:
