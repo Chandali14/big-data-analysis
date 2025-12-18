@@ -7,6 +7,13 @@ import java.io.IOException;
 
 public class MonthlyReducer extends Reducer<Text, Text, Text, Text> {
 
+    private String getOrdinal(int month) {
+        if (month == 1) return "1st";
+        if (month == 2) return "2nd";
+        if (month == 3) return "3rd";
+        return month + "th";
+    }
+
     @Override
     protected void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
@@ -24,6 +31,19 @@ public class MonthlyReducer extends Reducer<Text, Text, Text, Text> {
 
         double meanTemp = tempSum / count;
 
-        context.write(key, new Text(precipSum + "," + meanTemp));
+        // Key format: district,year,month
+        String[] parts = key.toString().split(",");
+        String district = parts[0];
+        int month = Integer.parseInt(parts[2]);
+        String ordinalMonth = getOrdinal(month);
+
+        String sentence =
+                district + " had a total precipitation of " +
+                precipSum + " hours with a mean temperature of " +
+                meanTemp + " for " + ordinalMonth + " month";
+
+        context.write(new Text(district), new Text(sentence));
+
+        // context.write(key, new Text(precipSum + "," + meanTemp));
     }
 }
