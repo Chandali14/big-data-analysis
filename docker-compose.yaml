@@ -97,6 +97,18 @@ services:
       - ./hadoop.env
     networks:
       - hadoop
+  
+  # PIG
+  pig:
+    image: apache/pig:latest
+    container_name: pig
+    depends_on:
+      - namenode
+      - datanode1
+    networks:
+      - hadoop
+    stdin_open: true
+    tty: true
 
 volumes:
   hadoop_namenode:
