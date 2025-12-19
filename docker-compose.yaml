@@ -100,7 +100,7 @@ services:
   
   # PIG
   pig:
-    image: apache/pig:latest
+    image: sequenceiq/pig:latest
     container_name: pig
     depends_on:
       - namenode
