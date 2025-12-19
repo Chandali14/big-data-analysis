@@ -123,17 +123,16 @@ services:
     env_file:
       - ./hive.env
     entrypoint: >
-      bash -c "
-      if [ -z \"$(psql -h metastore-db -U hive -d metastore -tAc
-        \"SELECT table_name FROM information_schema.tables
-        WHERE table_schema='public' LIMIT 1\")\" ];
-      then
-          echo 'Initializing Hive schema...';
+      bash -c '
+      echo "Checking if Hive schema exists...";
+      TABLE_COUNT=$(psql -h metastore-db -U hive -d metastore -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='\''public'\''");
+      if [ "$TABLE_COUNT" -eq 0 ]; then
+          echo "No schema found → Initializing Hive schema...";
           schematool -dbType postgres -initSchema --verbose;
       else
-          echo 'Hive schema already exists. Skipping.';
+          echo "Schema already exists → Skipping initialization.";
       fi
-      "
+      '
     networks:
       - hadoop
 
