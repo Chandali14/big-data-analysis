@@ -122,7 +122,18 @@ services:
       - namenode
     env_file:
       - ./hive.env
-    command: /opt/hive/bin/schematool -dbType postgres -initSchema --verbose
+    entrypoint: >
+      bash -c "
+      if [ -z \"$(psql -h metastore-db -U hive -d metastore -tAc
+        \"SELECT table_name FROM information_schema.tables
+        WHERE table_schema='public' LIMIT 1\")\" ];
+      then
+          echo 'Initializing Hive schema...';
+          schematool -dbType postgres -initSchema --verbose;
+      else
+          echo 'Hive schema already exists. Skipping.';
+      fi
+      "
     networks:
       - hadoop
 
