@@ -97,23 +97,68 @@ services:
       - ./hadoop.env
     networks:
       - hadoop
-  
-  # PIG
-  pig:
-    image: sequenceiq/pig:latest
-    container_name: pig
-    depends_on:
-      - namenode
-      - datanode1
+
+  # PostgreSQL Metastore
+  metastore-db:
+    image: postgres:11
+    container_name: metastore-db
+    environment:
+      POSTGRES_DB: metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+    ports:
+      - "5432:5432"
+    volumes:
+      - metastore_db:/var/lib/postgresql/data
     networks:
       - hadoop
-    stdin_open: true
-    tty: true
+
+  # Hive Schema init
+  hive-metastore-init:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore-init
+    depends_on:
+      - metastore-db
+      - namenode
+    env_file:
+      - ./hive.env
+    command: /opt/hive/bin/schematool -dbType postgres -initSchema --verbose
+    networks:
+      - hadoop
+
+  # Hive Metastore
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    depends_on:
+      - hive-metastore-init
+    env_file:
+      - ./hive.env
+    command: /opt/hive/bin/hive --service metastore
+    ports:
+      - "9083:9083"
+    networks:
+      - hadoop
+
+  # HiveServer2
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    depends_on:
+      - hive-metastore
+    env_file:
+      - ./hive.env
+    command: /opt/hive/bin/hiveserver2
+    ports:
+      - "10000:10000"
+    networks:
+      - hadoop
 
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
   hadoop_datanode2:
+  metastore_db:
 
 networks:
   hadoop:
