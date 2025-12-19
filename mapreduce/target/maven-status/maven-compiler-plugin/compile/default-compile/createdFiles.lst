@@ -1,0 +1,8 @@
+org/iit/weather/monthly_weather/MonthlyMapper.class
+org/iit/weather/monthly_weather/MonthlyDriver.class
+org/iit/weather/max_precipitation/MaxReducer.class
+org/iit/weather/monthly_weather/MonthlyReducer.class
+org/iit/weather/max_precipitation/MaxDriver.class
+org/iit/weather/max_precipitation/MaxMapper.class
+org/iit/weather/monthly_weather/MonthlyDriverRaw.class
+org/iit/weather/monthly_weather/MonthlyReducerRaw.class

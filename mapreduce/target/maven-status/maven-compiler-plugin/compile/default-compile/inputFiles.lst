@@ -1,0 +1,8 @@
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/monthly_weather/MonthlyReducerRaw.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/monthly_weather/MonthlyReducer.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/max_precipitation/MaxMapper.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/max_precipitation/MaxReducer.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/monthly_weather/MonthlyDriver.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/monthly_weather/MonthlyDriverRaw.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/max_precipitation/MaxDriver.java
+/home/iitgcpuser/big-data-analysis/mapreduce/src/main/java/org/iit/weather/monthly_weather/MonthlyMapper.java
