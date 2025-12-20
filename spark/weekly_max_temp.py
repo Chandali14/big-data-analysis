@@ -1,21 +1,16 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import weekofyear, col, max as _max
+from pyspark.sql.functions import col, max as _max
 
 spark = SparkSession.builder \
     .master("spark://spark-master:7077") \
-    .appName("WeeklyMaxTemp") \
+    .appName("WeeklyMaxTempClean") \
     .getOrCreate()
 
-df = spark.read.csv(
-    "hdfs://namenode:9000/data/weather/weather/weatherData.csv",
-    header=True,
-    inferSchema=True
-)
+# Read cleaned dataset
+df = spark.read.parquet("hdfs://namenode:9000/data/clean/weather_clean")
 
-df2 = df.withColumn("week", weekofyear(col("date")))
-
-result = df2.groupBy("year", "month", "week").agg(
-    _max("temperature_2m_max").alias("weekly_max_temp")
+result = df.groupBy("year", "month", "week").agg(
+    _max(col("temperature_max")).alias("weekly_max_temp")
 ).orderBy("year", "month", "week")
 
 result.show()
