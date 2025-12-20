@@ -1,74 +1,65 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import (
-    col, regexp_replace, to_date, year, month, weekofyear, dayofmonth
-)
+from pyspark.sql.functions import col, to_date, to_timestamp, year, month, weekofyear, dayofmonth
+from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, StringType
 
-# 1. CREATE SPARK SESSION
 spark = SparkSession.builder \
     .master("spark://spark-master:7077") \
-    .appName("WeatherPreprocessing") \
+    .appName("WeatherPreprocessingFixed") \
     .getOrCreate()
 
-# 2. READ RAW DATA FROM HDFS
-weather_path = "hdfs://namenode:9000/data/weather/weather/weatherData.csv"
-location_path = "hdfs://namenode:9000/data/weather/location/locationData.csv"
+# 1. Define Correct Schema
+schema = StructType([
+    StructField("location_id", IntegerType(), True),
+    StructField("date", StringType(), True),
+    StructField("weather_code", IntegerType(), True),
+    StructField("temperature_max", FloatType(), True),
+    StructField("temperature_min", FloatType(), True),
+    StructField("temperature_mean", FloatType(), True),
+    StructField("apparent_temp_max", FloatType(), True),
+    StructField("apparent_temp_min", FloatType(), True),
+    StructField("apparent_temp_mean", FloatType(), True),
+    StructField("daylight_duration", FloatType(), True),
+    StructField("sunshine_duration", FloatType(), True),
+    StructField("precipitation_sum", FloatType(), True),
+    StructField("rain_sum", FloatType(), True),
+    StructField("precipitation_hours", FloatType(), True),
+    StructField("wind_speed_max", FloatType(), True),
+    StructField("wind_gusts_max", FloatType(), True),
+    StructField("wind_direction", IntegerType(), True),
+    StructField("shortwave_radiation", FloatType(), True),
+    StructField("evapotranspiration", FloatType(), True),
+    StructField("sunrise", StringType(), True),
+    StructField("sunset", StringType(), True)
+])
 
-df_weather = spark.read.csv(weather_path, header=True, inferSchema=True)
-df_loc = spark.read.csv(location_path, header=True, inferSchema=True)
+# 2. Load weather CSV
+path_weather = "hdfs://namenode:9000/data/weather/weather/weatherData.csv"
 
-# 3. RENAME COLUMNS (remove spaces, units)
-rename_map = {
-    "temperature_2m_max (°C)": "temperature_max",
-    "temperature_2m_min (°C)": "temperature_min",
-    "temperature_2m_mean (°C)": "temperature_mean",
-    "apparent_temperature_max (°C)": "apparent_temp_max",
-    "apparent_temperature_min (°C)": "apparent_temp_min",
-    "apparent_temperature_mean (°C)": "apparent_temp_mean",
-    "daylight_duration (s)": "daylight_duration",
-    "sunshine_duration (s)": "sunshine_duration",
-    "precipitation_sum (mm)": "precipitation_sum",
-    "rain_sum (mm)": "rain_sum",
-    "precipitation_hours (h)": "precipitation_hours",
-    "wind_speed_10m_max (km/h)": "wind_speed_max",
-    "wind_gusts_10m_max (km/h)": "wind_gusts_max",
-    "wind_direction_10m_dominant (°)": "wind_direction",
-    "shortwave_radiation_sum (MJ/m²)": "shortwave_radiation",
-    "et0_fao_evapotranspiration (mm)": "evapotranspiration"
-}
+df_weather = spark.read.csv(path_weather, schema=schema, header=True)
 
-for old, new in rename_map.items():
-    df_weather = df_weather.withColumnRenamed(old, new)
-
-# 4. CLEAN NUMERIC COLUMNS
-numeric_cols = [
-    "temperature_max", "temperature_min", "temperature_mean",
-    "apparent_temp_max", "apparent_temp_min", "apparent_temp_mean",
-    "daylight_duration", "sunshine_duration", "precipitation_sum",
-    "rain_sum", "precipitation_hours", "wind_speed_max",
-    "wind_gusts_max", "shortwave_radiation", "evapotranspiration"
-]
-
-for col_name in numeric_cols:
-    df_weather = df_weather.withColumn(
-        col_name,
-        regexp_replace(col(col_name), "[^0-9.\-]", "").cast("float")
-    )
-
-# 5. DATE PARSING
+# 3. FIX DATE PARSING
+# Date format is M/d/yyyy  → Example: 1/5/2010
 df_weather = df_weather.withColumn(
     "date",
-    to_date(col("date"), "yyyy-MM-dd")
+    to_date(col("date"), "M/d/yyyy")
 )
 
-df_weather = df_weather.withColumn("year", year(col("date"))) \
-                       .withColumn("month", month(col("date"))) \
-                       .withColumn("week", weekofyear(col("date"))) \
-                       .withColumn("day", dayofmonth(col("date")))
+# 4. Extract year, month, week, day
+df_weather = df_weather \
+    .withColumn("year", year("date")) \
+    .withColumn("month", month("date")) \
+    .withColumn("week", weekofyear("date")) \
+    .withColumn("day", dayofmonth("date"))
 
-# 6. JOIN WEATHER + LOCATION
+# 5. Load location CSV
+path_loc = "hdfs://namenode:9000/data/weather/location/locationData.csv"
+
+df_loc = spark.read.csv(path_loc, header=True, inferSchema=True)
+
+# 6. Join weather + location data
 df_joined = df_weather.join(df_loc, on="location_id", how="left")
 
-# 7. SAVE CLEAN DATASET TO HDFS (PARQUET)
+# 7. Save Clean Dataset
 output_path = "hdfs://namenode:9000/data/clean/weather_clean"
 
 df_joined.write.mode("overwrite").parquet(output_path)
