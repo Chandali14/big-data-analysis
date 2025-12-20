@@ -166,7 +166,7 @@ services:
   
   # spark
   spark-master:
-    image: bitnami/spark:3.5.1
+    image: bitnami/spark:3.5.0
     container_name: spark-master
     environment:
       - SPARK_MODE=master
@@ -179,7 +179,7 @@ services:
       - hadoop
 
   spark-worker:
-    image: bitnami/spark:3.5.1
+    image: bitnami/spark:3.5.0
     container_name: spark-worker
     environment:
       - SPARK_MODE=worker
