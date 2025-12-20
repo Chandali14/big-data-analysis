@@ -175,7 +175,7 @@ services:
       - "8080:8080"   # Spark Master Web UI
       - "7077:7077"
     networks:
-      - bigdata
+      - hadoop
     volumes:
       - ./spark:/spark-scripts   # mount spark folder
 
@@ -186,7 +186,7 @@ services:
     environment:
       - SPARK_MASTER=spark://spark-master:7077
     networks:
-      - bigdata
+      - hadoop
 
 
 volumes:
