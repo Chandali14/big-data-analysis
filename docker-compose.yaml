@@ -166,10 +166,12 @@ services:
   
   # spark
   spark-master:
-    image: bitnami/spark:3.5.0
+    image: bitnami/spark:3.4.1-debian-11-r0
     container_name: spark-master
     environment:
       - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
     ports:
       - "8080:8080"
       - "7077:7077"
@@ -179,13 +181,15 @@ services:
       - hadoop
 
   spark-worker:
-    image: bitnami/spark:3.5.0
+    image: bitnami/spark:3.4.1-debian-11-r0
     container_name: spark-worker
+    depends_on:
+      - spark-master
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
-    depends_on:
-      - spark-master
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
     networks:
       - hadoop
 
