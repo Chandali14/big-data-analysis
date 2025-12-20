@@ -163,6 +163,31 @@ services:
       - "10000:10000"
     networks:
       - hadoop
+  
+  # spark
+  spark-master:
+    image: bde2020/spark-master:3.3.0-hadoop3.3
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+    ports:
+      - "8080:8080"   # Spark Master Web UI
+      - "7077:7077"
+    networks:
+      - bigdata
+    volumes:
+      - ./spark:/spark-scripts   # mount spark folder
+
+  spark-worker:
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
+    container_name: spark-worker
+    hostname: spark-worker
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    networks:
+      - bigdata
+
 
 volumes:
   hadoop_namenode:
