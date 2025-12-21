@@ -192,21 +192,21 @@ services:
     networks:
       - hadoop
   
-  # zeppelin
-  zeppelin:
-    image: apache/zeppelin:0.9.0
-    container_name: zeppelin
-    platform: linux/amd64
-    ports:
-      - "8089:8080"
-    depends_on:
-      - namenode
-      - spark-master
-    environment:
-      ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
-      ZEPPELIN_ADDR: 0.0.0.0
-    networks:
-      - big-data-analysis_hadoop
+  # # zeppelin
+  # zeppelin:
+  #   image: apache/zeppelin:0.9.0
+  #   container_name: zeppelin
+  #   platform: linux/amd64
+  #   ports:
+  #     - "8089:8080"
+  #   depends_on:
+  #     - namenode
+  #     - spark-master
+  #   environment:
+  #     ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
+  #     ZEPPELIN_ADDR: 0.0.0.0
+  #   networks:
+  #     - big-data-analysis_hadoop
 
 volumes:
   hadoop_namenode:
@@ -216,6 +216,6 @@ volumes:
 
 networks:
   hadoop:
-    external: true
-  big-data-analysis_hadoop:
-    external: true
+  #   external: true
+  # big-data-analysis_hadoop:
+  #   external: true
