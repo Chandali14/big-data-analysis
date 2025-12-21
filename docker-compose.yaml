@@ -196,15 +196,17 @@ services:
   zeppelin:
     image: apache/zeppelin:0.9.0
     container_name: zeppelin
+    platform: linux/amd64
     ports:
       - "8089:8080"
-    volumes:
-      - ./resources:/opt/resources
-    environment:
-      ZEPPELIN_ADDR: 0.0.0.0
     depends_on:
-      - spark-master
       - namenode
+      - spark-master
+    environment:
+      ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
+      ZEPPELIN_ADDR: 0.0.0.0
+    networks:
+      - default
 
 volumes:
   hadoop_namenode:
