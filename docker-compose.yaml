@@ -191,6 +191,20 @@ services:
       - SPARK_NO_DAEMONIZE=true
     networks:
       - hadoop
+  
+  # zeppelin
+  zeppelin:
+    image: apache/zeppelin:0.9.0
+    container_name: zeppelin
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./resources:/opt/resources
+    environment:
+      ZEPPELIN_ADDR: 0.0.0.0
+    depends_on:
+      - spark-master
+      - namenode
 
 volumes:
   hadoop_namenode:
