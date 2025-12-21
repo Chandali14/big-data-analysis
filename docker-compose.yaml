@@ -194,24 +194,18 @@ services:
   
   # zeppelin
   zeppelin:
-    image: apache/zeppelin:0.10.0
+    image: dylanmei/zeppelin-spark:latest
     container_name: zeppelin
-    platform: linux/amd64
     restart: always
     depends_on:
       - spark-master
       - namenode
     environment:
       ZEPPELIN_ADDR: 0.0.0.0
-      ZEPPELIN_JAVA_OPTS: >
-        -Dspark.master=spark://spark-master:7077
-        -Dspark.submit.deployMode=client
-      SPARK_HOME: /opt/spark
-      SPARK_CONF_DIR: /opt/spark/conf
+      ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
+      SPARK_HOME: /usr/local/spark
     ports:
       - "8089:8080"
-    volumes:
-      - ./zeppelin:/zeppelin-data
     networks:
       - hadoop
 
