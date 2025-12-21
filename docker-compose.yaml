@@ -206,7 +206,7 @@ services:
       ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
       ZEPPELIN_ADDR: 0.0.0.0
     networks:
-      - "big-data-analysis_hadoop
+      - "big-data-analysis_hadoop"
 
 volumes:
   hadoop_namenode:
