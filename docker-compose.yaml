@@ -191,24 +191,7 @@ services:
       - SPARK_NO_DAEMONIZE=true
     networks:
       - hadoop
-  
-  # zeppelin
-  zeppelin:
-    image: apache/zeppelin:0.10.0
-    container_name: zeppelin
-    platform: linux/amd64
-    restart: always
-    depends_on:
-      - spark-master
-      - namenode
-    environment:
-      ZEPPELIN_ADDR: 0.0.0.0
-      ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
-      SPARK_HOME: /opt/spark
-    ports:
-      - "8089:8080"
-    networks:
-      - hadoop
+
 
 volumes:
   hadoop_namenode:
