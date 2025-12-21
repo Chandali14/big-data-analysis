@@ -194,7 +194,7 @@ services:
   
   # zeppelin
   zeppelin:
-    image: apache/zeppelin:0.10.0-spark
+    image: apache/zeppelin:0.10.0
     container_name: zeppelin
     platform: linux/amd64
     restart: always
@@ -204,7 +204,7 @@ services:
     environment:
       ZEPPELIN_ADDR: 0.0.0.0
       ZEPPELIN_JAVA_OPTS: "-Dspark.master=spark://spark-master:7077"
-      SPARK_HOME: /usr/local/spark
+      SPARK_HOME: /opt/spark
     ports:
       - "8089:8080"
     networks:
