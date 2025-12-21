@@ -194,8 +194,9 @@ services:
   
   # zeppelin
   zeppelin:
-    image: dylanmei/zeppelin-spark:latest
+    image: apache/zeppelin:0.10.0-spark
     container_name: zeppelin
+    platform: linux/amd64
     restart: always
     depends_on:
       - spark-master
