@@ -14,3 +14,4 @@ result = df.groupBy("year", "month", "week").agg(
 ).orderBy("year", "month", "week")
 
 result.show()
+result.write.mode("overwrite").parquet("hdfs://namenode:9000/output/weekly_max_temp")

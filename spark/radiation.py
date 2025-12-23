@@ -19,3 +19,4 @@ result = df2.groupBy("month").agg(
 )
 
 result.show()
+result.write.mode("overwrite").parquet("hdfs://namenode:9000/output/radiation_percentage")

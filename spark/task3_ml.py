@@ -37,6 +37,10 @@ df_clean = df_may.select(
     "evapotranspiration"
 ).dropna()
 
+df_clean.write.mode("overwrite").parquet(
+    "hdfs://namenode:9000/output/task3/may_clean_data"
+)
+print("Saved cleaned May data to HDFS: /output/task3/may_clean_data")
 print("\n=== After Dropping Nulls ===")
 print("Rows:", df_clean.count())
 
@@ -69,6 +73,10 @@ print("Intercept:", model.intercept)
 # Evaluate Model
 predictions = model.transform(test_data)
 
+predictions.write.mode("overwrite").parquet(
+    "hdfs://namenode:9000/output/task3/predictions"
+)
+
 evaluator_rmse = RegressionEvaluator(
     labelCol="evapotranspiration",
     predictionCol="prediction",
@@ -88,6 +96,16 @@ print("\n=== Model Evaluation ===")
 print("RMSE:", rmse)
 print("R2:", r2)
 
+# SAVE METRICS TO HDFS
+metrics_df = spark.createDataFrame(
+    [(float(rmse), float(r2))],
+    ["RMSE", "R2"]
+)
+metrics_df.write.mode("overwrite").parquet(
+    "hdfs://namenode:9000/output/task3/evaluation_metrics"
+)
+print("Saved evaluation metrics to HDFS: /output/task3/evaluation_metrics")
+
 # 9. Prediction Example for May 2026
 print("\n=== Predicting for May 2026 ===")
 
@@ -101,6 +119,16 @@ example_df = spark.createDataFrame(
 
 result = model.transform(example_df)
 result.show()
+
+single_pred_value = float(result.collect()[0]["prediction"])
+print(f"\nPredicted evapotranspiration: {single_pred_value:.3f} mm")
+
+# SAVE MAY 2026 PREDICTION
+result.write.mode("overwrite").parquet(
+    "hdfs://namenode:9000/output/task3/may2026_prediction"
+)
+print("Saved May 2026 prediction to HDFS: /output/task3/may2026_prediction")
+
 
 pred_value = result.collect()[0]["prediction"]
 print(f"\nPredicted evapotranspiration: {pred_value:.3f} mm")
