@@ -203,8 +203,8 @@ services:
       - ZEPPELIN_LOG_DIR=/logs
       - ZEPPELIN_NOTEBOOK_DIR=/notebook
       - MASTER=spark://spark-master:7077
-      - SPARK_HOME=/opt/spark
-      - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+      # - SPARK_HOME=/opt/spark
+      # - JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
     volumes:
       - ./zeppelin/notebook:/notebook
       - ./zeppelin/logs:/logs                  
