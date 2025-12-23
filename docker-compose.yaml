@@ -196,16 +196,18 @@ services:
   zeppelin:
     image: apache/zeppelin:0.10.1
     container_name: zeppelin
-    hostname: zeppelin
+    restart: always
     ports:
       - "8081:8080"
     environment:
-      ZEPPELIN_LOG_DIR: /opt/zeppelin/logs
-      ZEPPELIN_NOTEBOOK_DIR: /opt/zeppelin/notebook
+      - ZEPPELIN_LOG_DIR=/logs
+      - ZEPPELIN_NOTEBOOK_DIR=/notebook
     volumes:
-      - ./zeppelin/notebooks:/opt/zeppelin/notebook
-      - ./spark:/spark-scripts                   
+      - ./zeppelin/notebook:/notebook
+      - ./zeppelin/logs:/logs                  
     networks:
+      - hadoop
+
       - hadoop
 
 volumes:
