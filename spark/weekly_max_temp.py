@@ -15,3 +15,7 @@ result = df.groupBy("year", "month", "week").agg(
 
 result.show()
 result.write.mode("overwrite").parquet("hdfs://namenode:9000/output/weekly_max_temp")
+result.write.mode("overwrite").csv(
+    "hdfs://namenode:9000/output/weekly_max_temp_csv",
+    header=True
+)

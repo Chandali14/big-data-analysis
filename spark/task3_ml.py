@@ -150,3 +150,17 @@ except:
 
 spark.stop()
 print("\n=== Task 3 Completed Successfully ===\n")
+
+# Save CSV
+df_clean.write.mode("overwrite").csv(
+    "hdfs://namenode:9000/output/task3/may_clean_data_csv",
+    header=True
+)
+predictions.write.mode("overwrite").csv(
+    "hdfs://namenode:9000/output/task3/predictions_csv",
+    header=True
+)
+result.write.mode("overwrite").csv(
+    "hdfs://namenode:9000/output/task3/may2026_prediction_csv",
+    header=True
+)
