@@ -122,19 +122,31 @@ services:
       - namenode
     env_file:
       - ./hive.env
-    entrypoint: >
-      bash -c '
-      echo "Checking if Hive schema exists...";
-      TABLE_COUNT=$$(psql -h metastore-db -U hive -d metastore -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='\''public'\''");
-      if [ "$$TABLE_COUNT" -eq 0 ]; then
-          echo "No schema found → Initializing Hive schema...";
-          schematool -dbType postgres -initSchema --verbose;
-      else
-          echo "Schema already exists → Skipping initialization.";
-      fi
-      '
+    command: schematool -dbType postgres -initSchema --verbose
     networks:
       - hadoop
+
+  # hive-metastore-init:
+  #   image: bde2020/hive:2.3.2-postgresql-metastore
+  #   container_name: hive-metastore-init
+  #   depends_on:
+  #     - metastore-db
+  #     - namenode
+  #   env_file:
+  #     - ./hive.env
+  #   entrypoint: >
+  #     bash -c '
+  #     echo "Checking if Hive schema exists...";
+  #     TABLE_COUNT=$$(psql -h metastore-db -U hive -d metastore -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='\''public'\''");
+  #     if [ "$$TABLE_COUNT" -eq 0 ]; then
+  #         echo "No schema found → Initializing Hive schema...";
+  #         schematool -dbType postgres -initSchema --verbose;
+  #     else
+  #         echo "Schema already exists → Skipping initialization.";
+  #     fi
+  #     '
+  #   networks:
+  #     - hadoop
   
   # Hive Metastore
   hive-metastore:
