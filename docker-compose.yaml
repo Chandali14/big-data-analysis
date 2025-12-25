@@ -100,7 +100,7 @@ services:
 
   # PostgreSQL Metastore
   metastore-db:
-    image: postgres:11
+    image: postgres:13
     container_name: metastore-db
     environment:
       POSTGRES_DB: metastore
@@ -114,55 +114,96 @@ services:
       - hadoop
 
   # Hive Schema init
+  # hive-metastore-init:
+  #   image: bde2020/hive:2.3.2-postgresql-metastore
+  #   container_name: hive-metastore-init
+  #   depends_on:
+  #     - metastore-db
+  #     - namenode
+  #   env_file:
+  #     - ./hive.env
+  #   entrypoint: >
+  #     bash -c '
+  #     echo "Checking if Hive schema exists...";
+  #     TABLE_COUNT=$$(psql -h metastore-db -U hive -d metastore -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='\''public'\''");
+  #     if [ "$$TABLE_COUNT" -eq 0 ]; then
+  #         echo "No schema found → Initializing Hive schema...";
+  #         schematool -dbType postgres -initSchema --verbose;
+  #     else
+  #         echo "Schema already exists → Skipping initialization.";
+  #     fi
+  #     '
+  #   networks:
+  #     - hadoop
+  
   hive-metastore-init:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: apache/hive:4.0.0
     container_name: hive-metastore-init
+    env_file:
+      - ./hive.env
+      - ./hadoop.env
     depends_on:
       - metastore-db
       - namenode
-    env_file:
-      - ./hive.env
-    entrypoint: >
-      bash -c '
-      echo "Checking if Hive schema exists...";
-      TABLE_COUNT=$$(psql -h metastore-db -U hive -d metastore -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='\''public'\''");
-      if [ "$$TABLE_COUNT" -eq 0 ]; then
-          echo "No schema found → Initializing Hive schema...";
-          schematool -dbType postgres -initSchema --verbose;
-      else
-          echo "Schema already exists → Skipping initialization.";
-      fi
-      '
-    networks:
-      - hadoop
+    command: >
+      bash -c "schematool -dbType postgres -initSchema -verbose"
+
 
   # Hive Metastore
+  # hive-metastore:
+  #   image: bde2020/hive:2.3.2-postgresql-metastore
+  #   container_name: hive-metastore
+  #   depends_on:
+  #     - hive-metastore-init
+  #   env_file:
+  #     - ./hive.env
+  #   command: /opt/hive/bin/hive --service metastore
+  #   ports:
+  #     - "9083:9083"
+  #   networks:
+  #     - hadoop
+
   hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: apache/hive:4.0.0
     container_name: hive-metastore
-    depends_on:
-      - hive-metastore-init
     env_file:
       - ./hive.env
-    command: /opt/hive/bin/hive --service metastore
+      - ./hadoop.env
+    depends_on:
+      hive-metastore-init:
+        condition: service_completed_successfully
+    command: >
+      bash -c "hive --service metastore"
     ports:
       - "9083:9083"
-    networks:
-      - hadoop
 
   # HiveServer2
+  # hive-server:
+  #   image: bde2020/hive:2.3.2-postgresql-metastore
+  #   container_name: hive-server
+  #   depends_on:
+  #     - hive-metastore
+  #   env_file:
+  #     - ./hive.env
+  #   command: /opt/hive/bin/hiveserver2
+  #   ports:
+  #     - "10000:10000"
+  #   networks:
+  #     - hadoop
+
   hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    image: apache/hive:4.0.0
     container_name: hive-server
-    depends_on:
-      - hive-metastore
     env_file:
       - ./hive.env
-    command: /opt/hive/bin/hiveserver2
+      - ./hadoop.env
+    depends_on:
+      - hive-metastore
+    command: >
+      bash -c "hiveserver2"
     ports:
       - "10000:10000"
-    networks:
-      - hadoop
+
   
   # spark
   spark-master:
